@@ -6,6 +6,7 @@ const typeDefs = `
   }
   type Token {
     value: String!
+    expiresIn: Int!
   }
   type Book {
     title: String!
@@ -49,6 +50,10 @@ const typeDefs = `
       username: String!
       password: String!
     ): Token
+  }
+
+  type Subscription {
+    bookAdded: Book!
   }
 `
 

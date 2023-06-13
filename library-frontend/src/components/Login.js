@@ -9,7 +9,6 @@ const Login = ({ show, setToken }) => {
 
   const onLogin = async (e) => {
     e.preventDefault()
-    // TODO: send a mutation, setToken
     userLogin({ variables: { username, password } })
 
     setUsername("")
@@ -19,7 +18,15 @@ const Login = ({ show, setToken }) => {
   useEffect(() => {
     if (data) {
       const token = data.login.value
-      window.localStorage.setItem("library-token", token)
+      const expireTimestamp = new Date().getTime() + data.login.expiresIn * 1000
+      // console.log(expireTimestamp)
+      window.localStorage.setItem(
+        "library-token",
+        JSON.stringify({
+          value: token,
+          expireTimestamp,
+        })
+      )
       setToken(token)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

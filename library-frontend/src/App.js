@@ -4,16 +4,38 @@ import Books from "./components/Books"
 import NewBook from "./components/NewBook"
 import Login from "./components/Login"
 import Recommendation from "./components/Recommendation"
-import { useApolloClient } from "@apollo/client"
-import { Routes, Route, Link } from "react-router-dom"
+import { useApolloClient, useSubscription } from "@apollo/client"
+import { ALL_BOOKS, BOOK_ADDED } from "./queries"
+
+export const updateBooksQuery = (cache, query, addedBook) => {
+  const uniqueByTitle = (arr) => {
+    const seen = new Set()
+    return arr.filter((book) =>
+      seen.has(book.title) ? false : seen.add(book.title)
+    )
+  }
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqueByTitle(allBooks.concat(addedBook)),
+    }
+  })
+}
 
 const App = () => {
   const client = useApolloClient()
   const [page, setPage] = useState("login")
   const [token, setToken] = useState(null)
 
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      // console.log(data)
+      const addedBook = data.data.bookAdded
+      window.alert(`${addedBook.title} has been added`)
+      updateBooksQuery(client.cache, { query: ALL_BOOKS }, addedBook)
+    },
+  })
+
   const logout = () => {
-    // TODO: remove token, clear storage, reser store
     if (window.confirm("Do you want to logout?")) {
       setToken(null)
       window.localStorage.clear()
@@ -21,28 +43,8 @@ const App = () => {
     }
   }
 
-  // const handlePage = (page) => {
-  //   if (token) {
-  //     setPage(page)
-  //   }
-  // }
-
   return (
     <div>
-      {/* <nav>
-        <button>
-          <Link to={"/authors"}>authors</Link>
-        </button>
-        <button>
-          <Link to={"/books"}>books</Link>
-        </button>
-        <button>
-          <Link to={"/login"}>login</Link>
-        </button>
-        <button>
-          <Link to={"/authors"}>authors</Link>
-        </button>
-      </nav> */}
       <div>
         <button onClick={() => setPage("authors")}>authors</button>
         <button onClick={() => setPage("books")}>books</button>

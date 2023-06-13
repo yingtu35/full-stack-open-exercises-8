@@ -2,12 +2,17 @@ import { useQuery } from "@apollo/client"
 import { ALL_BOOKS, CURUSER } from "../queries"
 
 const Recommendation = (props) => {
-  const { loading, error, data } = useQuery(CURUSER)
+  const { loading, error, data } = useQuery(CURUSER, {
+    pollInterval: 1000,
+  })
   const result = useQuery(ALL_BOOKS)
 
   if (loading || result.loading) {
     return <div>loading...</div>
   }
+  // console.log(data)
+
+  if (!data || !data.curUser) return null
   const favoriteGenre = data.curUser.favoriteGenre
   const books = result.data.allBooks.filter((book) =>
     book.genres.includes(favoriteGenre)

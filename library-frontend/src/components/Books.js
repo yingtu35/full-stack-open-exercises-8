@@ -2,15 +2,6 @@ import { useState } from "react"
 import { useQuery } from "@apollo/client"
 import { ALL_BOOKS } from "../queries"
 
-const genres = [
-  "refactoring",
-  "agile",
-  "patterns",
-  "design",
-  "crime",
-  "classic",
-]
-
 const Books = (props) => {
   const [selectedGenre, setSelectedGenre] = useState(null)
   const { loading, error, data, refetch } = useQuery(ALL_BOOKS)
@@ -21,6 +12,8 @@ const Books = (props) => {
   }
   if (loading) return <div>loading...</div>
 
+  // console.log(data)
+
   if (!props.show) {
     return null
   }
@@ -28,6 +21,10 @@ const Books = (props) => {
   // console.log(data)
 
   const books = data.allBooks
+  const genres = new Set()
+  books.forEach((book) => {
+    book.genres.forEach((genre) => genres.add(genre))
+  })
 
   return (
     <div>
@@ -52,12 +49,15 @@ const Books = (props) => {
         </tbody>
       </table>
       <div>
-        {genres.map((genre, idx) => (
-          <button key={idx} onClick={() => onGenreSwitch(`${genre}`)}>
-            {genre}
-          </button>
-        ))}
-        <button onClick={() => onGenreSwitch(null)}>all genres</button>
+        {selectedGenre === null ? (
+          [...genres].map((genre, idx) => (
+            <button key={idx} onClick={() => onGenreSwitch(`${genre}`)}>
+              {genre}
+            </button>
+          ))
+        ) : (
+          <button onClick={() => onGenreSwitch(null)}>back</button>
+        )}
       </div>
     </div>
   )
